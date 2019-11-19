@@ -9,8 +9,8 @@ class Block:
 
     GENESIS = {
         "timestamp": 1,
-        "last_hash": "a4dd70bc5bb3ac23bc3b829a3b37029d15c7530c318ffcff7f30691b498745df",
-        "hash": "9725bdb821e618a50dbfe245a8c4b7c21f73ff0ee16480eb1c51f94344a40aa4",
+        "last_hash": "00dd70bc5bb3ac23bc3b829a3b37029d15c7530c318ffcff7f30691b498745df",
+        "hash": "0005bdb821e618a50dbfe245a8c4b7c21f73ff0ee16480eb1c51f94344a40aa4",
         "data": [],
         "difficulty": 3,
         "nonce": "genesis_nonce",
@@ -82,6 +82,31 @@ class Block:
         else:
             return 1
 
+    @staticmethod
+    def is_valid(last_block, block):
+        """Validates a block.
+        A block must:
+        - have the correct last hash
+        - have correct number of leading zeros as per difficulty - proof of work requirement
+        - only adjust difficulty by a value of 1
+        - have a hash that is valid combo of block fields
+        """
+        if block.last_hash != last_block.hash:
+            raise LastHashError()
+
+        if block.hash[0 : block.difficulty] != "0" * block.difficulty:
+            raise ProofOfWorkError()
+
+        if abs(block.difficulty - last_block.difficulty) > 1:
+            raise DifficultyDeviationError()
+
+        reproduced_hash = BlockHelper.hash(
+            block.timestamp, block.last_hash, block.data, block.difficulty, block.nonce
+        )
+
+        if block.hash != reproduced_hash:
+            raise HashError()
+
 
 class BlockHelper:
     @staticmethod
@@ -95,5 +120,43 @@ class BlockHelper:
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
+class BlockError(Exception):
+    """Base class for exceptions in this module."""
+
+    pass
+
+
+class LastHashError(BlockError):
+    """Exception raised for errors with the last block hash."""
+
+    def __init__(self, message="Invalid last block hash."):
+        self.message = message
+
+
+class ProofOfWorkError(BlockError):
+    """Exception raised for errors with the proof of work."""
+
+    def __init__(self, message="Hash does not meet the proof of work requirement"):
+        self.message = message
+
+
+class DifficultyDeviationError(BlockError):
+    """Exception raised for errors with difficulty deviation."""
+
+    def __init__(self, message="Difficulty deviation is greater than permitted."):
+        self.message = message
+
+
+class HashError(BlockError):
+    """Exception raised for errors with the block hash"""
+
+    def __init__(self, message="Invalid block hash"):
+        self.message = message
+
+
 if __name__ == "__main__":
+    bad = Block.mine(Block.genesis(), "some data")
+    # bad.last_hash = 'evil data'
+
+    print(Block.is_valid(Block.genesis(), bad))
     pass
