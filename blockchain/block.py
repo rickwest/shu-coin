@@ -12,8 +12,8 @@ class Block:
         "last_hash": "a4dd70bc5bb3ac23bc3b829a3b37029d15c7530c318ffcff7f30691b498745df",
         "hash": "9725bdb821e618a50dbfe245a8c4b7c21f73ff0ee16480eb1c51f94344a40aa4",
         "data": [],
-        'difficulty': 3,
-        'nonce': 'genesis_nonce'
+        "difficulty": 3,
+        "nonce": "genesis_nonce",
     }
 
     def __init__(self, timestamp, last_hash, hash, data, difficulty, nonce):
@@ -33,7 +33,12 @@ class Block:
             difficulty: {}
             nonce: {}
             """.format(
-            self.timestamp, self.last_hash, self.hash, self.data, self.difficulty, self.nonce
+            self.timestamp,
+            self.last_hash,
+            self.hash,
+            self.data,
+            self.difficulty,
+            self.nonce,
         )
 
     @staticmethod
@@ -50,8 +55,8 @@ class Block:
 
         hash = BlockHelper.hash(timestamp, last_hash, data, difficulty, nonce)
 
-        while hash[0:difficulty] != '0' * difficulty:
-            nonce +=1
+        while hash[0:difficulty] != "0" * difficulty:
+            nonce += 1
             timestamp = time.time_ns()
             difficulty = Block.regulate_difficulty(last_block, timestamp)
             hash = BlockHelper.hash(timestamp, last_hash, data, difficulty, nonce)
