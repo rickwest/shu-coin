@@ -13,7 +13,7 @@ class Block:
         "hash": "0005bdb821e618a50dbfe245a8c4b7c21f73ff0ee16480eb1c51f94344a40aa4",
         "data": [],
         "difficulty": 3,
-        "nonce": "genesis_nonce",
+        "nonce": 0,
     }
 
     def __init__(self, timestamp, last_hash, hash, data, difficulty, nonce):
@@ -40,6 +40,9 @@ class Block:
             self.difficulty,
             self.nonce,
         )
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     @staticmethod
     def mine(last_block, data):
@@ -155,8 +158,4 @@ class HashError(BlockError):
 
 
 if __name__ == "__main__":
-    bad = Block.mine(Block.genesis(), "some data")
-    # bad.last_hash = 'evil data'
-
-    print(Block.is_valid(Block.genesis(), bad))
     pass
