@@ -39,6 +39,17 @@ class Blockchain:
     def __repr__(self):
         return "SHUcoin Blockchain: {}".format(self.chain)
 
+    def serialize(self):
+        """Encode a Blockchain object chain as a string."""
+        return [block.serialize() for block in self.chain]
+
+    @staticmethod
+    def deserialize(serialized_chain):
+        """Return a Blockchain instance from serialized string."""
+        blockchain = Blockchain()
+        blockchain.chain = [Block.deserialize(block) for block in serialized_chain]
+        return blockchain
+
     @staticmethod
     def is_valid(blockchain):
         """Validates a blockchain.

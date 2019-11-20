@@ -44,6 +44,15 @@ class Block:
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
+    def serialize(self):
+        """Encode Block object as a string."""
+        return self.__dict__
+
+    @staticmethod
+    def deserialize(serialized_block):
+        """Return a Block instance from serialized string."""
+        return Block(**serialized_block)
+
     @staticmethod
     def mine(last_block, data):
         """
