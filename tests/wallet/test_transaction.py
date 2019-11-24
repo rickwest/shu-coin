@@ -4,6 +4,9 @@ from wallet.transaction import (
     InsufficientFundsError,
     TransactionValuesError,
     TransactionSignatureError,
+    MiningRewardError,
+    MINING_REWARD,
+    MINING_REWARD_INPUT,
 )
 from unittest import TestCase
 
@@ -41,21 +44,17 @@ class TestTransaction(TestCase):
         )
 
     def test_transaction_amount_exceeds_balance(self):
-        sender_wallet = Wallet()
-        sender_wallet.balance = 50
-
+        # Wallet starts with the default starting balance so ensure transaction amount exceeds that.
         with self.assertRaises(InsufficientFundsError):
-            Transaction(sender_wallet, "richard_west", 100)
+            Transaction(Wallet(), "richard_west", 99999)
 
     def test_transaction_update_amount_exceeds_balance(self):
         sender_wallet = Wallet()
-        sender_wallet.balance = 50
-        recipient_address = "richard_west"
+        transaction = Transaction(sender_wallet, "richard_west", 40)
 
-        transaction = Transaction(sender_wallet, recipient_address, 40)
-
+        # Wallet starts with the default starting balance so ensure transaction amount exceeds that.
         with self.assertRaises(InsufficientFundsError):
-            transaction.update(sender_wallet, recipient_address, 20)
+            transaction.update(sender_wallet, "jing_wang", 99999)
 
     def test_transaction_update(self):
         sender_wallet = Wallet()
@@ -152,3 +151,29 @@ class TestTransaction(TestCase):
 
         with self.assertRaises(TransactionSignatureError):
             Transaction.is_valid(transaction)
+
+    def test_reward(self):
+        miner_wallet = Wallet()
+        transaction = Transaction.reward(miner_wallet)
+
+        self.assertEqual(transaction.input, MINING_REWARD_INPUT)
+        self.assertEqual(transaction.output[miner_wallet.address], MINING_REWARD)
+
+    def test_is_valid_reward_transaction(self):
+        reward_transaction = Transaction.reward(Wallet())
+        Transaction.is_valid(reward_transaction)
+
+    def test_invalid_reward_transaction_extra_recipient(self):
+        reward_transaction = Transaction.reward(Wallet())
+        reward_transaction.output["recipient_address"] = 50
+
+        with self.assertRaises(MiningRewardError):
+            Transaction.is_valid(reward_transaction)
+
+    def test_invalid_reward_transaction_bad_amount(self):
+        miner_wallet = Wallet()
+        reward_transaction = Transaction.reward(miner_wallet)
+        reward_transaction.output[miner_wallet.address] = 10000
+
+        with self.assertRaises(MiningRewardError):
+            Transaction.is_valid(reward_transaction)

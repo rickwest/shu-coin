@@ -5,6 +5,7 @@ import hashlib
 SECOND = 1000000000  # A second in nanoseconds
 MINE_RATE = 4000000000  # Mine rate in nanoseconds (4 seconds)
 
+
 class Block:
     """A unit of storage."""
 

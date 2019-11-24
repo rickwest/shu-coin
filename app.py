@@ -11,8 +11,11 @@ from wallet.transaction_pool import TransactionPool
 from pubsub import PubSub
 
 app = Flask(__name__)
+
+# In future when app starts could broadcast a message saying node joined, then get a list of peers
+
 blockchain = Blockchain()
-wallet = Wallet()
+wallet = Wallet(blockchain)
 transaction_pool = TransactionPool()
 pubsub = PubSub(blockchain, transaction_pool)
 
@@ -25,21 +28,34 @@ def get_blockchain():
 
 @app.route("/blockchain/mine")
 def mine():
-    transaction_data = "somedata"
+    # When a block is mined, add the serialized transactions from the transaction pool as it's data.
+    transaction_data = transaction_pool.get_serialized_transactions()
+    transaction_data.append(Transaction.reward(wallet).serialize())
+
     blockchain.add_block(transaction_data)
 
     block = blockchain.last_block
 
     pubsub.broadcast_block(block)
 
+    transaction_pool.clear_transactions(blockchain)
+
     return jsonify(block.serialize())
+
+
+@app.route("/wallet/show")
+def get_wallet():
+    return jsonify({"address": wallet.address, "balance": wallet.balance})
 
 
 @app.route("/wallet/transaction", methods=["POST"])
 def transaction():
     data = request.get_json()
 
-    transaction = transaction_pool.has_existing_transaction(wallet.address)
+    # Check to see if a transaction already exists in the pool for this nodes wallet.
+    # If it does, no need to create a new transaction, just update the existing one.
+    # This will also be broadcast to all nodes and replace the exiting transaction.
+    transaction = transaction_pool.get_transaction_for_address(wallet.address)
 
     if transaction:
         transaction.update(wallet, data["recipient_address"], data["amount"])
@@ -66,6 +82,7 @@ if (
     result_blockchain = Blockchain.deserialize(result.json())
 
     try:
+        # Synchronize with the blockchain
         blockchain.replace(result_blockchain.chain)
         print("Successfully synchronized the node.")
     except ChainReplacementError as e:

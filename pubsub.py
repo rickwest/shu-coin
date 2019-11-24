@@ -14,8 +14,9 @@ TRANSACTION_CHANNEL = "TRANSACTION_CHANNEL"
 
 
 class BlockListener(SubscribeCallback):
-    def __init__(self, blockchain):
+    def __init__(self, blockchain, transaction_pool):
         self.blockchain = blockchain
+        self.transaction_pool = transaction_pool
 
     def message(self, pubnub, message):
         if message.channel == BLOCK_CHANNEL:
@@ -24,6 +25,7 @@ class BlockListener(SubscribeCallback):
             proposed_chain.append(block)
             try:
                 self.blockchain.replace(proposed_chain)
+                self.transaction_pool.clear_transactions(self.blockchain)
                 print("Chain replaced successfully 👌")
             except ChainReplacementError as e:
                 print(e.message)
@@ -51,7 +53,7 @@ class PubSub:
         self.pubnub.subscribe().channels([BLOCK_CHANNEL, TRANSACTION_CHANNEL]).execute()
 
         # Add listeners
-        self.pubnub.add_listener(BlockListener(blockchain))
+        self.pubnub.add_listener(BlockListener(blockchain, transaction_pool))
         self.pubnub.add_listener(TransactionListener(transaction_pool))
 
     def publish(self, channel, message):

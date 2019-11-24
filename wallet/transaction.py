@@ -2,6 +2,9 @@ import uuid
 import time
 from wallet.wallet import Wallet
 
+MINING_REWARD = 50
+MINING_REWARD_INPUT = {"address": "⛏️---SHUcoin-mining-reward---💰"}
+
 
 class Transaction:
     """Represents an exchange of currency between wallets."""
@@ -83,6 +86,12 @@ class Transaction:
         """Validates a transaction"""
         output_total = sum(transaction.output.values())
 
+        if transaction.input == MINING_REWARD_INPUT:
+            if list(transaction.output.values()) != [MINING_REWARD]:
+                raise MiningRewardError()
+            # return if mining reward is valid.
+            return
+
         if transaction.input["amount"] != output_total:
             raise TransactionValuesError()
 
@@ -92,6 +101,13 @@ class Transaction:
             transaction.input["signature"],
         ):
             raise TransactionSignatureError()
+
+    @staticmethod
+    def reward(miner_wallet):
+        """Generate a transaction to reward the miner."""
+        return Transaction(
+            input=MINING_REWARD_INPUT, output={miner_wallet.address: MINING_REWARD}
+        )
 
 
 class TransactionError(Exception):
@@ -124,6 +140,13 @@ class TransactionSignatureError(TransactionError):
     """Exception raised when a transaction signature in invalid."""
 
     def __init__(self, message="Invalid transaction signature."):
+        self.message = message
+
+
+class MiningRewardError(TransactionError):
+    """Exception raised when a mining reward transaction in invalid."""
+
+    def __init__(self, message="Invalid mining reward."):
         self.message = message
 
 
