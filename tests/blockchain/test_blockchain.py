@@ -1,13 +1,22 @@
 from unittest import TestCase
-from blockchain.blockchain import Blockchain, GenesisError, ChainReplacementError
+from blockchain.blockchain import (
+    Blockchain,
+    GenesisError,
+    ChainReplacementError,
+    ContainsInvalidTransactionError,
+)
 from blockchain.block import Block
+from wallet.transaction import Transaction, TransactionSignatureError
+from wallet.wallet import Wallet
 
 
 class TestBlockchain(TestCase):
     def setUp(self):
         self.blockchain = Blockchain()
         for i in range(4):
-            self.blockchain.add_block("block {}".format(i))
+            self.blockchain.add_block(
+                [Transaction(Wallet(), "recipient_address", i).serialize()]
+            )
 
     def test_instance(self):
         self.assertEqual(Blockchain().genesis, Block.genesis())
@@ -39,7 +48,7 @@ class TestBlockchain(TestCase):
         # Try replacing chain with longer chain
         blockchain.replace(self.blockchain.chain)
 
-        # Assert that chain was reaplaced by longer one
+        # Assert that chain was replaced by longer one
         self.assertEqual(blockchain.chain, self.blockchain.chain)
 
     def test_replace_incoming_not_longer(self):
@@ -62,3 +71,35 @@ class TestBlockchain(TestCase):
         with self.assertRaises(ChainReplacementError):
             # Try replacing chain with shorter chain
             blockchain.replace(self.blockchain.chain)
+
+    def test_contains_valid_transactions(self):
+        Blockchain.contains_valid_transactions(self.blockchain.chain)
+
+    def test_contains_valid_transactions_duplicate_transaction(self):
+        transaction = Transaction(Wallet(), "recipient", 1).serialize()
+
+        self.blockchain.add_block([transaction, transaction])
+
+        with self.assertRaises(ContainsInvalidTransactionError):
+            Blockchain.contains_valid_transactions(self.blockchain.chain)
+
+    def test_contains_valid_transactions_duplicate_rewards(self):
+        self.blockchain.add_block(
+            [
+                Transaction.reward(Wallet()).serialize(),
+                Transaction.reward(Wallet()).serialize(),
+            ]
+        )
+        # Block contains multiple reward transactions so we expect an exception
+        with self.assertRaises(ContainsInvalidTransactionError):
+            Blockchain.contains_valid_transactions(self.blockchain.chain)
+
+    def test_contains_valid_transactions_bad_transaction(self):
+        bad_transaction = Transaction(Wallet(), "recipient", 1)
+        # Use same transaction output but signed by wrong wallet
+        bad_transaction.input["signature"] = Wallet().sign(bad_transaction.output)
+
+        self.blockchain.add_block([bad_transaction.serialize()])
+
+        with self.assertRaises(TransactionSignatureError):
+            Blockchain.contains_valid_transactions(self.blockchain.chain)

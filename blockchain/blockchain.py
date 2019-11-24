@@ -1,4 +1,5 @@
 from blockchain.block import Block, BlockError
+from wallet.transaction import Transaction, MINING_REWARD_INPUT
 
 
 class Blockchain:
@@ -66,6 +67,41 @@ class Blockchain:
             last_block = blockchain[i - 1]
             Block.is_valid(last_block, block)
 
+    @staticmethod
+    def contains_valid_transactions(blockchain):
+        """Validates a chains based on rules for transactions.
+        - a transaction must only appear once in the chain
+        - there can only be one mining reward transaction per block
+        - each transaction must be valid
+        """
+        transaction_ids = set()
+        for block in blockchain:
+            has_mining_reward = False
+            for serialized_transaction in block.data:
+                transaction = Transaction.deserialize(serialized_transaction)
+
+                if transaction.input == MINING_REWARD_INPUT:
+                    # If already true then block must contain two reward transactions
+                    if has_mining_reward:
+                        raise ContainsInvalidTransactionError(
+                            "Block {} has multiple mining reward transactions.".format(
+                                block.hash
+                            )
+                        )
+
+                    has_mining_reward = True
+
+                if transaction.id in transaction_ids:
+                    raise ContainsInvalidTransactionError(
+                        "Chain contains a duplicate transaction. Transaction {} is duplicated.".format(
+                            transaction.id
+                        )
+                    )
+
+                transaction_ids.add(transaction.id)
+
+                Transaction.is_valid(transaction)
+
 
 class BlockchainError(Exception):
     """Base class for exceptions in this module."""
@@ -86,6 +122,13 @@ class ChainReplacementError(BlockchainError):
     def __init__(
         self, message="Incoming chain is invalid. Local chain cannot be replaced."
     ):
+        self.message = message
+
+
+class ContainsInvalidTransactionError(BlockchainError):
+    """Exception raised for errors with transactions within the chain."""
+
+    def __init__(self, message="Invalid transaction in chain."):
         self.message = message
 
 
