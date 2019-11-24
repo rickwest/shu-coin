@@ -5,8 +5,10 @@ from blockchain.block import (
     HashError,
     DifficultyDeviationError,
     ProofOfWorkError,
+    MINE_RATE,
+    SECOND,
 )
-from config import MINE_RATE, SECONDS
+
 import time
 
 
@@ -35,7 +37,7 @@ class TestBlock(TestCase):
     def test_difficulty_when_block_mined_too_slowly(self):
         last_block = Block.mine(self.last_block, "TRX")
 
-        time.sleep(MINE_RATE / SECONDS)
+        time.sleep(MINE_RATE / SECOND)
 
         # New block mined too slowly, slower that the MINE_RATE.
         mined_block = Block.mine(last_block, "Stellar")
@@ -48,7 +50,7 @@ class TestBlock(TestCase):
         # Ensure last block difficulty is 1
         last_block.difficulty = 1
 
-        time.sleep(MINE_RATE / SECONDS)
+        time.sleep(MINE_RATE / SECOND)
 
         # New block mined too slowly, slower that the MINE_RATE.
         mined_block = Block.mine(last_block, "Some more data")
