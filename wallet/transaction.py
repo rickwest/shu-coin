@@ -6,13 +6,23 @@ from wallet.wallet import Wallet
 class Transaction:
     """Represents an exchange of currency between wallets."""
 
-    def __init__(self, sender_wallet, recipient_address, amount):
-        self.id = str(uuid.uuid4())
-        self.output = self.create_output(sender_wallet, recipient_address, amount)
+    def __init__(
+        self,
+        sender_wallet=None,
+        recipient_address=None,
+        amount=None,
+        id=None,
+        output=None,
+        input=None,
+    ):
+        self.id = id or str(uuid.uuid4())
+        self.output = output or self.create_output(
+            sender_wallet, recipient_address, amount
+        )
 
         # Create a data structure that represents the input data for the transaction.
         # Signs the transaction and include the senders public key and wallet address.
-        self.input = {
+        self.input = input or {
             "timestamp": time.time_ns(),
             "amount": sender_wallet.balance,
             "address": sender_wallet.address,
@@ -58,6 +68,15 @@ class Transaction:
         # Update timestamp and re-sign with the updated output
         self.input["timestamp"] = time.time_ns()
         self.input["signature"] = sender_wallet.sign(self.output)
+
+    def serialize(self):
+        """Encode Transaction object as a string."""
+        return self.__dict__
+
+    @staticmethod
+    def deserialize(serialized_transaction):
+        """Return a Transaction instance from serialized string."""
+        return Transaction(**serialized_transaction)
 
     @staticmethod
     def is_valid(transaction):

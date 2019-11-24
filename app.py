@@ -2,13 +2,19 @@ import os
 import random
 import requests
 import sys
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from blockchain.blockchain import Blockchain, ChainReplacementError
+from wallet.wallet import Wallet
+from wallet.transaction import Transaction
+from wallet.transaction_pool import TransactionPool
+
 from pubsub import PubSub
 
 app = Flask(__name__)
 blockchain = Blockchain()
-pubsub = PubSub(blockchain)
+wallet = Wallet()
+transaction_pool = TransactionPool()
+pubsub = PubSub(blockchain, transaction_pool)
 
 
 @app.route("/")
@@ -27,6 +33,22 @@ def mine():
     pubsub.broadcast_block(block)
 
     return jsonify(block.serialize())
+
+
+@app.route("/wallet/transaction", methods=["POST"])
+def transaction():
+    data = request.get_json()
+
+    transaction = transaction_pool.has_existing_transaction(wallet.address)
+
+    if transaction:
+        transaction.update(wallet, data["recipient_address"], data["amount"])
+    else:
+        transaction = Transaction(wallet, data["recipient_address"], data["amount"])
+
+    pubsub.broadcast_transaction(transaction)
+
+    return jsonify(transaction.serialize())
 
 
 ROOT_PORT = 5000
