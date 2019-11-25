@@ -7,11 +7,13 @@ from blockchain.blockchain import Blockchain, ChainReplacementError
 from wallet.wallet import Wallet
 from wallet.transaction import Transaction
 from wallet.transaction_pool import TransactionPool
+from flask_cors import CORS
+
 
 from pubsub import PubSub
 
 app = Flask(__name__)
-
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 # In future when app starts could broadcast a message saying node joined, then get a list of peers
 
 blockchain = Blockchain()
@@ -88,6 +90,22 @@ if (
     except ChainReplacementError as e:
         print("Error synchronizing the node - {}".format(e.message))
 
+if (
+    os.environ.get("SEED") == "1"
+    or os.environ.get("SEED") == "True"
+    or "seed" in sys.argv
+):
+    for i in range(10):
+        blockchain.add_block(
+            [
+                Transaction(
+                    Wallet(), Wallet().address, random.randint(2, 50)
+                ).serialize(),
+                Transaction(
+                    Wallet(), Wallet().address, random.randint(2, 50)
+                ).serialize(),
+            ]
+        )
 app.run(port=PORT)
 
 if __name__ == "__main__":
