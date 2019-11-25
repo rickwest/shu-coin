@@ -38,7 +38,7 @@ function Blockchain() {
         <Block key={block.hash} block={block} />
       ))}
       <nav>
-        <ul className="pagination">
+        <ul className="pagination justify-content-center">
           {buttons.map(number => (
             <li
               key={number}
