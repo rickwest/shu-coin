@@ -14,11 +14,11 @@ class Blockchain:
         return self.chain[0]
 
     @property
-    def last_block(self):
+    def previous_block(self):
         return self.chain[-1]
 
     def add_block(self, data):
-        self.chain.append(Block.mine(self.last_block, data))
+        self.chain.append(Block.mine(self.previous_block, data))
 
     def replace(self, chain):
         """Replaces the local chain with the incoming one if:
@@ -65,8 +65,8 @@ class Blockchain:
 
         for i in range(1, len(blockchain)):
             block = blockchain[i]
-            last_block = blockchain[i - 1]
-            Block.is_valid(last_block, block)
+            previous_block = blockchain[i - 1]
+            Block.is_valid(previous_block, block)
 
         Blockchain.contains_valid_transactions(blockchain)
 

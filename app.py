@@ -34,7 +34,7 @@ def mine():
 
     blockchain.add_block(transaction_data)
 
-    block = blockchain.last_block
+    block = blockchain.previous_block
 
     pubsub.broadcast_block(block)
 

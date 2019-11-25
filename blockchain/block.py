@@ -11,16 +11,16 @@ class Block:
 
     GENESIS = {
         "timestamp": 1,
-        "last_hash": "00dd70bc5bb3ac23bc3b829a3b37029d15c7530c318ffcff7f30691b498745df",
+        "previous_hash": "00dd70bc5bb3ac23bc3b829a3b37029d15c7530c318ffcff7f30691b498745df",
         "hash": "0005bdb821e618a50dbfe245a8c4b7c21f73ff0ee16480eb1c51f94344a40aa4",
         "data": [],
         "difficulty": 3,
         "nonce": 0,
     }
 
-    def __init__(self, timestamp, last_hash, hash, data, difficulty, nonce):
+    def __init__(self, timestamp, previous_hash, hash, data, difficulty, nonce):
         self.timestamp = timestamp
-        self.last_hash = last_hash
+        self.previous_hash = previous_hash
         self.hash = hash
         self.data = data
         self.difficulty = difficulty
@@ -29,14 +29,14 @@ class Block:
     def __repr__(self):
         return """
             timestamp: {}
-            last hash: {}
+            previous hash: {}
             hash: {}
             data: {}
             difficulty: {}
             nonce: {}
             """.format(
             self.timestamp,
-            self.last_hash,
+            self.previous_hash,
             self.hash,
             self.data,
             self.difficulty,
@@ -56,26 +56,26 @@ class Block:
         return Block(**serialized_block)
 
     @staticmethod
-    def mine(last_block, data):
+    def mine(previous_block, data):
         """
-        Mines a block based on given last block and data.
+        Mines a block based on given previous block and data.
         Mining is only complete when a block hash is found that meets the leading 0's requirement of proof of work.
         """
         timestamp = time.time_ns()
-        last_hash = last_block.hash
+        previous_hash = previous_block.hash
 
-        difficulty = Block.regulate_difficulty(last_block, timestamp)
+        difficulty = Block.regulate_difficulty(previous_block, timestamp)
         nonce = 0
 
-        hash = BlockHelper.hash(timestamp, last_hash, data, difficulty, nonce)
+        hash = BlockHelper.hash(timestamp, previous_hash, data, difficulty, nonce)
 
         while hash[0:difficulty] != "0" * difficulty:
             nonce += 1
             timestamp = time.time_ns()
-            difficulty = Block.regulate_difficulty(last_block, timestamp)
-            hash = BlockHelper.hash(timestamp, last_hash, data, difficulty, nonce)
+            difficulty = Block.regulate_difficulty(previous_block, timestamp)
+            hash = BlockHelper.hash(timestamp, previous_hash, data, difficulty, nonce)
 
-        return Block(timestamp, last_hash, hash, data, difficulty, nonce)
+        return Block(timestamp, previous_hash, hash, data, difficulty, nonce)
 
     @staticmethod
     def genesis():
@@ -83,13 +83,13 @@ class Block:
         return Block(**Block.GENESIS)
 
     @staticmethod
-    def regulate_difficulty(last_block, new_timestamp):
+    def regulate_difficulty(previous_block, new_timestamp):
         """Regulates the block difficulty based on the configured MINE_RATE.
         We increase the difficulty for blocks mined too quickly and decrease the difficulty for blocks mined slowly
         """
-        difficulty = last_block.difficulty
+        difficulty = previous_block.difficulty
 
-        if (new_timestamp - last_block.timestamp) < MINE_RATE:
+        if (new_timestamp - previous_block.timestamp) < MINE_RATE:
             return difficulty + 1
         elif (difficulty - 1) > 0:
             return difficulty - 1
@@ -97,25 +97,29 @@ class Block:
             return 1
 
     @staticmethod
-    def is_valid(last_block, block):
+    def is_valid(previous_block, block):
         """Validates a block.
         A block must:
-        - have the correct last hash
+        - have the correct previous hash
         - have correct number of leading zeros as per difficulty - proof of work requirement
         - only adjust difficulty by a value of 1
         - have a hash that is valid combo of block fields
         """
-        if block.last_hash != last_block.hash:
-            raise LastHashError()
+        if block.previous_hash != previous_block.hash:
+            raise PreviousHashError()
 
         if block.hash[0 : block.difficulty] != "0" * block.difficulty:
             raise ProofOfWorkError()
 
-        if abs(block.difficulty - last_block.difficulty) > 1:
+        if abs(block.difficulty - previous_block.difficulty) > 1:
             raise DifficultyDeviationError()
 
         reproduced_hash = BlockHelper.hash(
-            block.timestamp, block.last_hash, block.data, block.difficulty, block.nonce
+            block.timestamp,
+            block.previous_hash,
+            block.data,
+            block.difficulty,
+            block.nonce,
         )
 
         if block.hash != reproduced_hash:
@@ -140,10 +144,10 @@ class BlockError(Exception):
     pass
 
 
-class LastHashError(BlockError):
-    """Exception raised for errors with the last block hash."""
+class PreviousHashError(BlockError):
+    """Exception raised for errors with the previous block hash."""
 
-    def __init__(self, message="Invalid last block hash."):
+    def __init__(self, message="Invalid previous block hash."):
         self.message = message
 
 

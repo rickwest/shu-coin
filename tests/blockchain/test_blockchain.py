@@ -21,8 +21,8 @@ class TestBlockchain(TestCase):
     def test_instance(self):
         self.assertEqual(Blockchain().genesis, Block.genesis())
 
-    def test_get_last_block(self):
-        self.assertEqual(self.blockchain.last_block, self.blockchain.chain[-1])
+    def test_get_previous_block(self):
+        self.assertEqual(self.blockchain.previous_block, self.blockchain.chain[-1])
 
     def test_add_block(self):
         self.assertEqual(len(self.blockchain.chain), 5)
@@ -30,7 +30,7 @@ class TestBlockchain(TestCase):
         self.blockchain.add_block("SHUcoin")
 
         self.assertEqual(len(self.blockchain.chain), 6)
-        self.assertEqual(self.blockchain.last_block.data, "SHUcoin")
+        self.assertEqual(self.blockchain.previous_block.data, "SHUcoin")
 
     def test_is_valid(self):
         Blockchain.is_valid(self.blockchain.chain)
