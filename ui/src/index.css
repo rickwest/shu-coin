@@ -13,3 +13,11 @@
 .page-link:focus {
     box-shadow: 0 0 0 0.2rem rgba(182,2,79,.25)
 }
+
+a {
+    color: #B9024F;
+}
+
+a:hover {
+    color: #621B40;
+}
