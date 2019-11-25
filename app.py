@@ -25,7 +25,15 @@ pubsub = PubSub(blockchain, transaction_pool)
 @app.route("/")
 @app.route("/blockchain")
 def get_blockchain():
-    return jsonify(blockchain.serialize())
+    start = request.args.get("s")
+    end = request.args.get("e")
+
+    result = blockchain.serialize()[::-1]
+
+    if start and end:
+        return jsonify(result[int(start) : int(end)])
+
+    return jsonify(result)
 
 
 @app.route("/blockchain/mine")
@@ -43,6 +51,11 @@ def mine():
     transaction_pool.clear_transactions(blockchain)
 
     return jsonify(block.serialize())
+
+
+@app.route("/blockchain/length")
+def length():
+    return jsonify(len(blockchain.chain))
 
 
 @app.route("/wallet/show")
