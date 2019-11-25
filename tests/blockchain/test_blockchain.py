@@ -103,3 +103,21 @@ class TestBlockchain(TestCase):
 
         with self.assertRaises(TransactionSignatureError):
             Blockchain.contains_valid_transactions(self.blockchain.chain)
+
+    def test_contains_valid_transactions_bad_historic_balance(self):
+        wallet = Wallet()
+        bad_transaction = Transaction(wallet, "recipient", 1)
+
+        # Tamper with transaction, giving wallet a high amount
+        bad_transaction.output[wallet.address] = 1000
+
+        # Ensure input amount and transaction amount are still correct so validation doesn't fail at that point
+        bad_transaction.input["amount"] = 1001
+
+        # Re-sign
+        wallet.sign(bad_transaction.output)
+
+        self.blockchain.add_block([bad_transaction.serialize()])
+
+        with self.assertRaises(ContainsInvalidTransactionError):
+            Blockchain.contains_valid_transactions(self.blockchain.chain)

@@ -1,5 +1,6 @@
 from blockchain.block import Block, BlockError
 from wallet.transaction import Transaction, MINING_REWARD_INPUT
+from wallet.wallet import Wallet
 
 
 class Blockchain:
@@ -67,6 +68,8 @@ class Blockchain:
             last_block = blockchain[i - 1]
             Block.is_valid(last_block, block)
 
+        Blockchain.contains_valid_transactions(blockchain)
+
     @staticmethod
     def contains_valid_transactions(blockchain):
         """Validates a chains based on rules for transactions.
@@ -75,10 +78,21 @@ class Blockchain:
         - each transaction must be valid
         """
         transaction_ids = set()
-        for block in blockchain:
+        for i in range(len(blockchain)):
+            block = blockchain[i]
+
             has_mining_reward = False
             for serialized_transaction in block.data:
                 transaction = Transaction.deserialize(serialized_transaction)
+
+                if transaction.id in transaction_ids:
+                    raise ContainsInvalidTransactionError(
+                        "Chain contains a duplicate transaction. Transaction {} is duplicated.".format(
+                            transaction.id
+                        )
+                    )
+
+                transaction_ids.add(transaction.id)
 
                 if transaction.input == MINING_REWARD_INPUT:
                     # If already true then block must contain two reward transactions
@@ -90,15 +104,21 @@ class Blockchain:
                         )
 
                     has_mining_reward = True
+                else:
+                    # Validate correct balance based on blockchain to date
+                    historic_blockchain = Blockchain()
+                    historic_blockchain.chain = blockchain[0:i]
 
-                if transaction.id in transaction_ids:
-                    raise ContainsInvalidTransactionError(
-                        "Chain contains a duplicate transaction. Transaction {} is duplicated.".format(
-                            transaction.id
-                        )
+                    historic_balance = Wallet.calculate_balance(
+                        historic_blockchain, transaction.input["address"]
                     )
 
-                transaction_ids.add(transaction.id)
+                    if historic_balance != transaction.input["amount"]:
+                        raise ContainsInvalidTransactionError(
+                            "Transaction {} contains an invalid input amount.".format(
+                                transaction.id
+                            )
+                        )
 
                 Transaction.is_valid(transaction)
 
