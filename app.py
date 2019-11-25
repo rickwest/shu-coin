@@ -58,6 +58,16 @@ def length():
     return jsonify(len(blockchain.chain))
 
 
+@app.route("/blockchain/addresses")
+def addresses():
+    addresses = set()
+    for block in blockchain.chain:
+        for transaction in block.data:
+            addresses.update(transaction["output"].keys())
+
+    return jsonify(list(addresses))
+
+
 @app.route("/wallet/show")
 def get_wallet():
     return jsonify({"address": wallet.address, "balance": wallet.balance})
@@ -80,6 +90,11 @@ def transaction():
     pubsub.broadcast_transaction(transaction)
 
     return jsonify(transaction.serialize())
+
+
+@app.route("/transactions")
+def get_transactions():
+    return jsonify(transaction_pool.get_serialized_transactions())
 
 
 ROOT_PORT = 5000
@@ -119,6 +134,13 @@ if (
                 ).serialize(),
             ]
         )
+
+    for i in range(3):
+        transaction_pool.add_transaction(
+            Transaction(Wallet(), Wallet().address, random.randint(2, 50))
+        )
+
+
 app.run(port=PORT)
 
 if __name__ == "__main__":

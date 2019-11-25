@@ -23,7 +23,7 @@ function ToggleTransactions({ block }) {
   }
   return (
     <div>
-      {block.data.length > 1 ? (
+      {block.data.length > 0 ? (
         <button className="btn btn-sm btn-success" onClick={toggleDisplay}>
           Show More
         </button>

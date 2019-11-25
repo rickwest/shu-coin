@@ -7,14 +7,18 @@ import { createBrowserHistory } from "history";
 import Blockchain from "./components/Blockchain";
 import TransactionForm from "./components/TransactionForm";
 import Layout from "./components/Layout";
+import TransactionPool from "./components/TransactionPool";
+
+export const history = createBrowserHistory();
 
 ReactDOM.render(
-  <Router history={createBrowserHistory()}>
+  <Router history={history}>
     <Switch>
       <Layout>
         <Route path="/" exact component={App} />
         <Route path="/blockchain" component={Blockchain} />
         <Route path="/transaction/new" component={TransactionForm} />
+        <Route path="/transaction/pool" component={TransactionPool} />
       </Layout>
     </Switch>
   </Router>,

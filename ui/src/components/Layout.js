@@ -10,12 +10,12 @@ function Layout({ children }) {
           <img className="img-fluid" src={logo} alt="SHUcoin logo" />
           <div className="mt-4 mb-4">
             <ul className="nav justify-content-center border-bottom mb-4">
-                <li className="nav-item">
+              <li className="nav-item">
                 <Link className="nav-link" to="/">
                   Home
                 </Link>
               </li>
-                <li className="nav-item">
+              <li className="nav-item">
                 <Link className="nav-link" to="/blockchain">
                   Blockchain Explorer
                 </Link>
@@ -25,8 +25,12 @@ function Layout({ children }) {
                   New Transaction
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/transaction/pool">
+                  Transaction Pool
+                </Link>
+              </li>
             </ul>
-
             {children}
           </div>
         </div>

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
+import { history } from "../index";
 
 function TransactionForm() {
   const [amount, setAmount] = useState(0);
   const [recipientAddress, setRecipientAddress] = useState("");
   const [hasError, setHasError] = useState(false);
+  const [knownAddresses, setKnownAddresses] = useState([]);
 
   const submitTransaction = () => {
     if (!amount > 0 || !recipientAddress.trim()) {
@@ -19,11 +21,16 @@ function TransactionForm() {
     })
       .then(response => response.json())
       .then(json => {
-        console.log("submitTransaction json", json);
-
         alert("Transaction submitted successfully!");
+        history.push("/transaction/pool");
       });
   };
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/blockchain/addresses`)
+      .then(response => response.json())
+      .then(json => setKnownAddresses(json));
+  }, []);
 
   return (
     <div className="transaction-form">
@@ -43,7 +50,7 @@ function TransactionForm() {
           placeholder="Enter recipient wallet address..."
           value={recipientAddress}
           onChange={event => {
-            setRecipientAddress(event.target.value);
+            setRecipientAddress(event.target.value.trim());
             setHasError(false);
           }}
           required={true}
@@ -70,6 +77,16 @@ function TransactionForm() {
       >
         Submit
       </button>
+      <hr className="mb-4 mt-4" />
+      <div>
+        <h5>Known Wallet Addresses</h5>
+        {knownAddresses.map((address, index) => (
+          <span key={address} className="small text-muted">
+            {address}
+            {index !== knownAddresses.length - 1 ? " | " : ""}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
