@@ -159,6 +159,10 @@ Every node in this project has a copy of the full blockchain, it's own wallet an
 
 For interacting with the SHUcoin API the ui application, built with [React](https://reactjs.org/), provides a convenient way to explore the blockchain, create transactions and mine new blocks. 
 
+### Video Demonstration
+
+There is a video demonstration of the application available here: https://www.loom.com/share/5e4b7752462e47708deb22f755ddaa52
+
 ### Basic Concepts
 
 This project is the application of a simple distributed, decentralized cryptocurrency utilizing an underlying blockchain for the immutable store of data. I have covered some of the basic concepts inplemented in the project below:
