@@ -37,6 +37,7 @@ function TransactionPool() {
           <hr />
         </div>
       ))}
+      {/*eslint-disable-next-line*/}
       <button className="btn btn-success" onClick={mineBlock}>
         Mine a block of these transactions ⛏️
       </button>

@@ -13,7 +13,7 @@ from flask_cors import CORS
 from pubsub import PubSub
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 # In future when app starts could broadcast a message saying node joined, then get a list of peers
 
 blockchain = Blockchain()
@@ -25,15 +25,11 @@ pubsub = PubSub(blockchain, transaction_pool)
 @app.route("/")
 @app.route("/blockchain")
 def get_blockchain():
-    start = request.args.get("s")
-    end = request.args.get("e")
+    return jsonify(blockchain.serialize())
 
-    result = blockchain.serialize()[::-1]
-
-    if start and end:
-        return jsonify(result[int(start) : int(end)])
-
-    return jsonify(result)
+@app.route("/blockchain/range")
+def get_blockchain_range():
+    return jsonify(blockchain.serialize()[::-1][int(request.args.get("s")) : int(request.args.get("e"))])
 
 
 @app.route("/blockchain/mine")

@@ -12,7 +12,7 @@ function Blockchain() {
   const fetchBlockchainPage = ({ start, end }) => {
     setCurrentPage(start / PAGE_RANGE);
 
-    fetch(`${API_BASE_URL}/blockchain?s=${start}&e=${end}`)
+    fetch(`${API_BASE_URL}/blockchain/range?s=${start}&e=${end}`)
       .then(response => response.json())
       .then(json => setBlockchain(json));
   };
@@ -50,6 +50,7 @@ function Blockchain() {
                 });
               }}
             >
+              {/*eslint-disable-next-line*/}
               <a className="page-link" href="#">
                 {number + 1}
               </a>
