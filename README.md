@@ -129,10 +129,10 @@ To run the frontend React application you need to navigate into the `ui` directo
 **You also need to specify the port of the API that you would like to connect to.**
 
 ```
-REACT_APP_SERVER_PORT={port number of api to connect to} npm start
+cd ui
+REACT_APP_SERVER_PORT={port number of API to connect to} npm start
 
 // For example:
-
 REACT_APP_SERVER_PORT=5000 npm start
 ```
 --- 
@@ -144,3 +144,52 @@ The important functionality of the project is unit tested. You can run the test 
 ```
 python3 -m unittest
 ```
+
+---
+
+## Usage
+
+### The Ui
+
+Cryptocurrency networks, such as the Bitcoin, usually comprise of 4 different types of nodes; full nodes, super nodes, light nodes, and mining nodes.
+
+This simple implementation, however, consists of only one type of node. 
+
+Every node in this project has a copy of the full blockchain, it's own wallet and is able to mine transactions.
+
+For interacting with the SHUcoin API the ui application, built with [React](https://reactjs.org/), provides a convenient way to explore the blockchain, create transactions and mine new blocks. 
+
+### Basic Concepts
+
+This project is the application of a simple distributed, decentralized cryptocurrency utilizing an underlying blockchain for the immutable store of data. I have covered some of the basic concepts inplemented in the project below:
+
+#### Blockchain
+The basic concept of blockchain is quite simple. A blockchain is a distributed database that maintains a continuously growing list of ordered records (blocks).
+
+#### Proof of work
+Proof of work introduces a computational puzzle that needs to be solved before a block can be added to the blockchain. Trying to solve this puzzle is commonly known as “mining”.
+When a block is mined, the new block is broadcast too all the nodes in the network so that they can update there own blockchain.
+
+Proof-of-work also enables us to approximately control the rate in which blocks can be added to the blockchain. 
+This is done by changing the difficulty of the puzzle. If blocks are mined too often, the difficulty of the puzzle will increase and vice versa.
+
+#### Transactions
+Transactions are what turns the blockchain project into a cryptocurrency and enables the sending of coins from one address to another, assuming that we can show a proof that we own them in the first place.
+
+#### Transaction Pool
+The transaction pool (also known as “mempool” in bitcoin). stores transactions that are not yet included in the blockchain. In bitcoin, these transaction are also known as “unconfirmed transactions”. 
+Typically, when someone wants to include a transaction to the blockchain, the transaction is broadcast to the network and hopefully some node will mine the transaction to the blockchain.
+This feature is very important for a working cryptocurrency, since it means you don’t need to mine a block yourself, in order to include a transaction to the blockchain.
+
+#### Wallet
+The goal of the wallet is to act as an address interface for the cryptocurrency. Just like in a cryptocurrency like Bitcoin, you send coins to user wallent addresses and publish your own wallet address where other people can send coins.
+
+--- 
+
+## References
+
+Hartikka, L. (2017). Naivecoin: a tutorial for building a cryptocurrency. Retrieved 26 November 2019, from https://lhartikk.github.io/
+
+Van Flymen, D. (2019). Learn Blockchains by Building One. Retrieved 26 November 2019, from https://medium.com/@vanflymen/learn-blockchains-by-building-one-117428612f46
+
+Nakamoto, S. (2008) Bitcoin: A Peer-to-Peer Electronic Cash System. https://bitcoin.org/bitcoin.pdf
