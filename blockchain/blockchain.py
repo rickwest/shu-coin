@@ -20,7 +20,7 @@ class Blockchain:
     def add_block(self, data):
         self.chain.append(Block.mine(self.previous_block, data))
 
-    def replace(self, chain):
+    def replace(self, chain, validate_blocks=True):
         """Replaces the local chain with the incoming one if:
         - incoming chain is longer than local chain
         - incoming chain is valid
@@ -34,11 +34,11 @@ class Blockchain:
         # Got a problem validating block hashes for blocks that contains transactions.from
         # This is due to the ordering of the transaction data in the dictionaries being different.
         # For now, on replacement, don't validate each individual block in the chain, just accept the longer one.
-
-        # try:
-        #     Blockchain.is_valid(chain)
-        # except BlockError as e:
-        #     raise ChainReplacementError("Cannot replace. {}".format(e.message))
+        if validate_blocks:
+            try:
+                Blockchain.is_valid(chain)
+            except BlockError as e:
+                raise ChainReplacementError("Cannot replace. {}".format(e.message))
 
         self.chain = chain
 

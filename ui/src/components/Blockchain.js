@@ -34,8 +34,8 @@ function Blockchain() {
     <div className="blockchain">
       <h3 className="mb-4">SHUcoin Blockchain</h3>
 
-      {blockchain.map(block => (
-        <Block key={block.hash} block={block} />
+      {blockchain.map((block, idx) => (
+        <Block key={idx} block={block} />
       ))}
       <nav>
         <ul className="pagination justify-content-center">

@@ -109,7 +109,7 @@ if (
 
     try:
         # Synchronize with the blockchain
-        blockchain.replace(result_blockchain.chain)
+        blockchain.replace(result_blockchain.chain, False)
         print("Successfully synchronized the node.")
     except ChainReplacementError as e:
         print("Error synchronizing the node - {}".format(e.message))
