@@ -137,6 +137,16 @@ class BlockHelper:
 
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
+    @staticmethod
+    def order_dict(dictionary):
+        result = {}
+        for k, v in sorted(dictionary.items()):
+            if isinstance(v, dict):
+                result[k] = BlockHelper.order_dict(v)
+            else:
+                result[k] = v
+        return result
+
 
 class BlockError(Exception):
     """Base class for exceptions in this module."""

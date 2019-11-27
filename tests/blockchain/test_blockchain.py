@@ -62,15 +62,15 @@ class TestBlockchain(TestCase):
             # Try replacing chain with shorter chain
             self.blockchain.replace(incoming.chain)
 
-    # def test_replace_incoming_not_valid(self):
-    #     # Create a new blockchain, only has genesis
-    #     blockchain = Blockchain()
-    #
-    #     self.blockchain.chain[1].data = "Some bad data"
-    #
-    #     with self.assertRaises(ChainReplacementError):
-    #         # Try replacing chain with shorter chain
-    #         blockchain.replace(self.blockchain.chain)
+    def test_replace_incoming_not_valid(self):
+        # Create a new blockchain, only has genesis
+        blockchain = Blockchain()
+
+        self.blockchain.chain[1].data = "Some bad data"
+
+        with self.assertRaises(ChainReplacementError):
+            # Try replacing chain with shorter chain
+            blockchain.replace(self.blockchain.chain)
 
     def test_contains_valid_transactions(self):
         Blockchain.contains_valid_transactions(self.blockchain.chain)

@@ -1,6 +1,7 @@
 import uuid
 import time
 from wallet.wallet import Wallet
+from blockchain.block import BlockHelper
 
 MINING_REWARD = 50
 MINING_REWARD_INPUT = {"address": "⛏️---SHUcoin-mining-reward---💰"}
@@ -25,12 +26,17 @@ class Transaction:
 
         # Create a data structure that represents the input data for the transaction.
         # Signs the transaction and include the senders public key and wallet address.
-        self.input = input or {
+        self.input = input or self.create_input(sender_wallet)
+
+    def create_input(self, sender_wallet):
+        return {
             "timestamp": time.time_ns(),
             "amount": sender_wallet.balance,
             "address": sender_wallet.address,
             "public_key": sender_wallet.public_key,
-            "signature": sender_wallet.sign(self.output),
+            "signature": sender_wallet.sign(
+                BlockHelper.order_dict(self.output)
+            ),  # Ensure dictionaries are sorted when we sign them
         }
 
     def create_output(self, sender_wallet, recipient_address, amount):
@@ -69,8 +75,7 @@ class Transaction:
         self.output[sender_wallet.address] = self.output[sender_wallet.address] - amount
 
         # Update timestamp and re-sign with the updated output
-        self.input["timestamp"] = time.time_ns()
-        self.input["signature"] = sender_wallet.sign(self.output)
+        self.input = self.create_input(sender_wallet)
 
     def serialize(self):
         """Encode Transaction object as a string."""

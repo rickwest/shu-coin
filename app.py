@@ -8,6 +8,7 @@ from wallet.wallet import Wallet
 from wallet.transaction import Transaction
 from wallet.transaction_pool import TransactionPool
 from flask_cors import CORS
+from blockchain.block import BlockHelper
 
 
 from pubsub import PubSub
@@ -27,9 +28,14 @@ pubsub = PubSub(blockchain, transaction_pool)
 def get_blockchain():
     return jsonify(blockchain.serialize())
 
+
 @app.route("/blockchain/range")
 def get_blockchain_range():
-    return jsonify(blockchain.serialize()[::-1][int(request.args.get("s")) : int(request.args.get("e"))])
+    return jsonify(
+        blockchain.serialize()[::-1][
+            int(request.args.get("s")) : int(request.args.get("e"))
+        ]
+    )
 
 
 @app.route("/blockchain/mine")
@@ -37,6 +43,8 @@ def mine():
     # When a block is mined, add the serialized transactions from the transaction pool as it's data.
     transaction_data = transaction_pool.get_serialized_transactions()
     transaction_data.append(Transaction.reward(wallet).serialize())
+
+    transaction_data = [BlockHelper.order_dict(dict) for dict in transaction_data]
 
     blockchain.add_block(transaction_data)
 
@@ -109,7 +117,7 @@ if (
 
     try:
         # Synchronize with the blockchain
-        blockchain.replace(result_blockchain.chain, False)
+        blockchain.replace(result_blockchain.chain)
         print("Successfully synchronized the node.")
     except ChainReplacementError as e:
         print("Error synchronizing the node - {}".format(e.message))

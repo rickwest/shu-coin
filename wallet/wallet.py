@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives.asymmetric.utils import (
 )
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.exceptions import InvalidSignature
+from blockchain.block import BlockHelper
 
 STARTING_BALANCE = 10000  # Wallet starting balance, because we're kind like that!
 
@@ -49,7 +50,9 @@ class Wallet:
         try:
             deserialized_public_key.verify(
                 encode_dss_signature(signature[0], signature[1]),
-                json.dumps(data).encode("utf-8"),
+                json.dumps(BlockHelper.order_dict(data)).encode(
+                    "utf-8"
+                ),  # Ensure dictionary is ordered
                 ec.ECDSA(hashes.SHA256()),
             )
             return True
