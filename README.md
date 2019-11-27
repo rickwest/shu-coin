@@ -161,7 +161,7 @@ For interacting with the SHUcoin API the ui application, built with [React](http
 
 ### Video Demonstration
 
-There is a video demonstration of the application available here: https://www.loom.com/share/5e4b7752462e47708deb22f755ddaa52
+There is a video demonstration of the application available here: https://www.loom.com/share/c8134f3cfd7e4d80add162a862b01c73
 
 ### Basic Concepts
 
